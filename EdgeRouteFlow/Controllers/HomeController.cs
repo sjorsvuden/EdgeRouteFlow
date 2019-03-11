@@ -4,6 +4,9 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Devices;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Microsoft.Azure.Devices.Shared;
 
 namespace EdgeRouteFlow.Controllers
 {
@@ -71,17 +74,35 @@ namespace EdgeRouteFlow.Controllers
         [HttpPost]
         public IActionResult Flow(FlowData a)
         {
+
             try
             {
-                var connectionString = a.cs;
+               dynamic routes;
+                if (a.routes != null)
+                {
+                    JObject jsonRoutes = JObject.Parse(a.routes);
+                    var jsonRoutesList = jsonRoutes["routes"].ToList<JToken>();
+                    JObject newJObject = new JObject();
+                    foreach (var attribute in jsonRoutesList)
+                    {
+                        newJObject.Add(attribute);
+                    }
+                    TwinCollection twinCollection = new TwinCollection(newJObject, new JObject());
+                    routes = twinCollection;
+                }
 
-                var registryManager = RegistryManager.CreateFromConnectionString(connectionString);
+                else
+                {
+                    var connectionString = a.cs;
 
-                var twin = registryManager.GetTwinAsync(a.dn, "$edgeHub").Result;
+                    var registryManager = RegistryManager.CreateFromConnectionString(connectionString);
 
-                var desired = twin.Properties.Desired;
+                    var twin = registryManager.GetTwinAsync(a.dn, "$edgeHub").Result;
 
-                var routes = desired["routes"];
+                    var desired = twin.Properties.Desired;
+
+                    routes = desired["routes"];
+                }
 
                 List<Route> routeList = ExtractEdgeHubRoutes(routes);
 
@@ -100,6 +121,8 @@ namespace EdgeRouteFlow.Controllers
 
         private static List<Route> ExtractEdgeHubRoutes(dynamic routes)
         {
+            var type = routes.GetType().ToString();
+
             var routeList = new List<Route>();
 
             foreach (var r in routes)
@@ -143,8 +166,10 @@ namespace EdgeRouteFlow.Controllers
                 }
             }
 
+
             return routeList;
         }
+    
 
         private static List<Module> ExtractRoutes(List<Route> routeList)
         {
@@ -252,5 +277,6 @@ namespace EdgeRouteFlow.Controllers
     {
         public string cs { get; set; }
         public string dn { get; set; }
+        public string routes { get; set; }
     }
 }

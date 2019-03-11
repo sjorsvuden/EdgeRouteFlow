@@ -1,44 +1,57 @@
 ﻿@{
     ViewData["Title"] = "Iot Edge module routes flow diagram";
 }
+<h1 class="display-4">IoT Edge module routes flow diagram</h1>
 
-<div class="text-center">
-    <h1 class="display-4">IoT Edge module routes flow diagram</h1>
-
-    <div id="input">
-        <label style="width:200px; display:inline-block">IoT Hub ConnectionString</label><input type="text" id="cs" style="width:600px; display:inline-block" /><br>
-        <label style="width:200px; display:inline-block">Device name</label><input type="text" id="dn" style="width:200px; display:inline-block" />
-        <label style="width:200px; display:inline-block"></label><input type="button" id="btnSubmit" value="Submit" style="width:195px; display:inline-block" />
-    </div>
-    <div id="error" style="display:none">
-        <label style="display:inline-block; color:crimson">Please check the IoT Hub connectionstring and IoT Edge device name.</label>
-    </div>
-    <div id="copy" style="display:none">
-        <label style="display:inline-block">Copyright 2019 @@svelde - <a href="http://blog.vandevelde-online.com">Blog</a></label>
-    </div>
+<div id="iothub" class="text-center" style="display:inline-block">
+    <label style="width:200px; display:inline-block">IoT Hub ConnectionString</label><input type="text" id="cs" style="width:600px; display:inline-block" /><br>
+    <label style="width:200px; display:inline-block">Device name</label><input type="text" id="dn" style="width:200px; display:inline-block" />
+    <label style="width:1px; display:inline-block"></label><input type="button" id="btnManual" value="Manual" style="width:195px; display:inline-block" />
+    <label style="width:1px; display:inline-block"></label><input type="button" id="btnSubmit2" value="Submit" style="width:195px; display:inline-block" />
 </div>
-
+<div id="routesdiv" class="text-center" style="display:none">
+    <label style="width:200px; display:inline-block">Manual Routes</label><input type="text" id="routes" style="width:600px; display:inline-block" /><br>
+    <label style="width:1px; display:inline-block"></label><input type="button" id="btnIoTHub" value="IoTHub" style="width:195px; display:inline-block" />
+    <label style="width:1px; display:inline-block"></label><input type="button" id="btnSubmit" value="Submit" style="width:195px; display:inline-block" />
+</div>
+<div id="error" style="display:none">
+    <label style="display:inline-block; color:crimson">Please check the IoT Hub connectionstring and IoT Edge device name.</label>
+</div>
+<div id="copy" style="display:none">
+    <label style="display:inline-block">Copyright 2019 @@svelde - <a href="http://blog.vandevelde-online.com">Blog</a></label>
+</div>
 <div style="height:2500px; width:2500px;" id="routingchart"></div>
-
 @section Scripts{
     <link rel="stylesheet" href="~/js/jquery.flowchart.css">
-
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script src="~/js/jquery.flowchart.js"></script>
-
+    <script src="~/js/bootstrap-switch.js"></script>
     <script language="javascript">
         $(document).ready(function () {
 
             $('#input').show();
             $("#error").hide();
             $("#copy").hide();
+            $('#btnManual').click(function () {
+                var x = document.getElementById("iothub");
+                var y = document.getElementById("routesdiv");
+                x.style.display = "none";
+                y.style.display = "inline-block";
 
+            });
+            $('#btnIoTHub').click(function () {
+                var x = document.getElementById("iothub");
+                var y = document.getElementById("routesdiv");
+                x.style.display = "inline-block";
+                y.style.display = "none";
+
+            });
             $('#btnSubmit').click(function () {
                 var cs = $('#cs').val();
                 var dn = $('#dn').val();
-
-                var dataToPost = { 'cs': cs, 'dn': dn };
+                var routes = $('#routes').val();
+                var dataToPost = { 'cs': cs, 'dn': dn, 'routes': routes };
 
                 $('#input').hide();
                 $('#error').hide();
